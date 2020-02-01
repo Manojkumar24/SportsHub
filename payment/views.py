@@ -38,12 +38,13 @@ def payment_done(request):
         product.stock -= item.qty
         if item.delivery_cost > 0:
             print('before delivery options')
-            d = DeliveryOptions.objects.get(product=product, cost=item.delivery_cost, pincode=pincode.pin_code)
+            d = DeliveryOptions.objects.get(product=product, cost=item.delivery_cost, location=pincode.location)
             print('entring json dump')
             data = json.dumps(
-                {'name': d.name_id, 'product': d.product.id, 'pincode': pincode.pin_code, 'prod_name': d.product.prod_name,
+                {'name': d.name_id, 'product': d.product.id, 'location': pincode.location, 'pincode': pincode.pin_code,
+                 'prod_name': d.product.prod_name,
                  'address': profile.address, 'phonenum': profile.phone_number,
-                 'customer_name': request.user.username})
+                 'customer_name': request.user.username, 'mail': request.user.email, 'order_id': order_to_purchase.ref_code})
             print('requesting')
             requests.post(url=url, data=data)
 
@@ -101,3 +102,19 @@ def payment_process(request):
     form = PayPalPaymentsForm(initial=paypal_dict)
     context = {"form": form, 'order': order, 'Shopping': 'active'}
     return render(request, "payment/process.html", context)
+
+
+def show_me_the_money(sender, **kwargs):
+    ipn_obj = sender
+    print('in show nme the money')
+    payStatus = ipn_obj.POST.get('payment_status', '')
+
+    if payStatus == 'Completed':
+        print('done')
+        print(ipn_obj.POST.get('txn_id'))
+        print(ipn_obj.POST.get('mc_gross'))
+
+
+def your_orders(request):
+    orders = Order.objects.filter(owner=Profile.objects.get(user_name=request.user), is_ordered=True)
+    return render(request, 'payment/your_orders.html', {'orders': orders, 'Your_Orders': 'active'})

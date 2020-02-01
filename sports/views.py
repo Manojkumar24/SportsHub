@@ -19,6 +19,8 @@ from django.http import JsonResponse
 from rest_framework.parsers import JSONParser
 from sports.serializers import TournamentSerializer, JoinTournamentSerializer
 from django.views.generic import ListView, DetailView
+
+from user_auth.models import Services
 from .models import Sport_Info
 
 from django.views.generic import ListView, DetailView
@@ -35,7 +37,7 @@ def homepage(request):
         d1_ts = time.mktime(last_update[0].last_update.timetuple())
         d2_ts = time.mktime(now.timetuple())
 
-        if (int(d2_ts - d1_ts) / 60) > 1000:
+        if (int(d2_ts - d1_ts) / 60) > 1000000:
             scrape_all_sports()
             LastNewsUpdate.objects.all().delete()
             LastNewsUpdate.objects.create(last_update=datetime.now())
@@ -219,35 +221,36 @@ def delete_coaching_centers(request, c_id):
 @api_view(['GET'])
 def tournamentsList(request):
     if request.method == 'GET':
-        snippets = Tournaments.objects.all()
-        serializer = TournamentSerializer(snippets, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        if Services.objects.filter(token=request.GET.get('api_key'), service_type='Tournaments').exists():
+            snippets = Tournaments.objects.all()
+            serializer = TournamentSerializer(snippets, many=True)
+            return JsonResponse(serializer.data, safe=False)
+        else:
+            return Response('Invalid API Key', status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['POST'])
 def tournamentsJoin(request):
-    if request.method == 'POST':
-        data = JSONParser().parse(request)
-        # t = Tournaments.objects.get(name=data['tournament'])
-        # data['tournament'] = t.pk
-
-        # tournament = get_object_or_404(Tournaments, title=request.data.get('tournament'))
-
-        serializer = JoinTournamentSerializer(data=data)
-        print(data)
-        if serializer.is_valid():
-            tournament = Tournaments.objects.get(pk=data['tournament'])
-            tournament.no_of_joined += 1
-            tournament.save()
-            print('User Joined')
-            print(data['tournament'])
-            # t = Tournaments.objects.get(pk=data['tournament'])
-            # t.no_of_joined += 1
-            # t.save()
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        print(serializer.errors)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    if Services.objects.filter(token=request.GET.get('api_key'), service_type='Tournaments').exists():
+        if request.method == 'POST':
+            data = JSONParser().parse(request)
+            serializer = JoinTournamentSerializer(data=data)
+            print(data)
+            if serializer.is_valid():
+                tournament = Tournaments.objects.get(pk=data['tournament'])
+                tournament.no_of_joined += 1
+                tournament.save()
+                print('User Joined')
+                print(data['tournament'])
+                # t = Tournaments.objects.get(pk=data['tournament'])
+                # t.no_of_joined += 1
+                # t.save()
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            print(serializer.errors)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response('Invalid API Key', status=status.HTTP_400_BAD_REQUEST)
 
 
 class TournamentDeregister(APIView):
@@ -309,3 +312,36 @@ def participants_list(request, t_id):
     participants = TournamentJoin.objects.filter(tournament=t)
     return render(request, 'sports/participants_list.html',
                   {'participants': participants, 'Tournaments_active': 'active'})
+
+
+@api_view(['POST'])
+def tournament_leave(request):
+    if Services.objects.filter(token=request.GET.get('api_key'), service_type='Tournaments').exists():
+        if request.method == 'POST':
+            data = JSONParser().parse(request)
+            # t = Tournaments.objects.get(name=data['tournament'])
+            # data['tournament'] = t.pk
+
+            # tournament = get_object_or_404(Tournaments, title=request.data.get('tournament'))
+
+            pk = data['tournament']
+            name = data['name']
+            print(pk, name)
+            try:
+                instances = TournamentJoin.objects.filter(tournament_id=pk, name=name)
+                for instance in instances:
+                    if instance.user is None:
+                        instance.delete()
+                        tournament = Tournaments.objects.get(pk=pk)
+                        tournament.no_of_joined -= 1
+                        tournament.save()
+                        print('deleted')
+                        return Response('deleted the instance', status=status.HTTP_200_OK)
+                print('not found')
+                return Response('deleted the instance', status=status.HTTP_404_NOT_FOUND)
+            except:
+                pass
+            print('error occured')
+            return Response('invalid data', status=status.HTTP_400_BAD_REQUEST)
+    else:
+        return Response('invalid API Key', status=status.HTTP_400_BAD_REQUEST)

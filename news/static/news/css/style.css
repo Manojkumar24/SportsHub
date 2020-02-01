@@ -89,10 +89,6 @@ a:hover, a:focus {
   background-size: cover;
   }
 
-  #slide3 {
-    background-color: white;
-  }
-
 #preloader {
   display: -webkit-box;
   display: -ms-flexbox;
@@ -220,7 +216,8 @@ img {
 .bg-img {
   background-position: center center;
   background-size: cover;
-  background-repeat: no-repeat;}
+  background-repeat: no-repeat;
+}
 
 .bg-transparent {
   background-color: transparent; }
@@ -409,7 +406,7 @@ img {
   padding:200px;
   text-align:center;
   font-family:mountains;
-  font-size: 120px;
+  font-size: 110px;
   color: white;
 }
 
@@ -417,14 +414,14 @@ img {
   padding: 120px 0px 70px 230px;
   text-align:left;
   font-family:mountains;
-  font-size: 60px;
+  font-size: 42px;
   color: white;
 }
 
 .hero-content .hero-meta-data {
-  font-size: 45px;
+  font-size: 20px;
   font-family : Work sans;
-  top:-15px;
+  top:25px;
   position: relative;
 }
 
@@ -591,6 +588,12 @@ input:-ms-input-placeholder {
   color: #bebebe; }
 input:-moz-placeholder {
   color: #bebebe; }
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
 .submit {
   width: auto;
@@ -1426,7 +1429,7 @@ textarea:focus ~ .highlight {
 /* Footer Area CSS */
 .footer-area {
   background-color: #161616;
-  padding: 70px 0;
+  padding: 50px 0;
   position: relative;
   z-index: 1; }
   .footer-area .footer-single-widget .copywrite-text p {
@@ -1444,7 +1447,7 @@ textarea:focus ~ .highlight {
         display: block; }
     @media only screen and (max-width: 767px) {
       .footer-area .footer-single-widget .footer-menu {
-        margin: 50px 0; } }
+        margin: 5x0px 0; } }
   .footer-area .footer-single-widget h5 {
     font-size: 18px;
     font-family: "Ubuntu", sans-serif;

@@ -24,7 +24,7 @@ SECRET_KEY = 'cxvliud5(9ags$&i)uj#sy0muuf#k%saz^g9$ov4&h*+$6n+38'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['b1011820.ngrok.io', '127.0.0.1']
 
 # Application definition
 
@@ -91,7 +91,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'sportshub',
         'USER': 'root',
-        'PASSWORD': 'mysqlroot',
+        'PASSWORD': 'Swathi123@',
         'HOST': 'localhost',
         'PORT': '',
     }
